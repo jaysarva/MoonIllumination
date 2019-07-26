@@ -27,11 +27,13 @@ import sys
 
 names=['2019cwt']
 
-tomorrow = datetime.now() + timedelta(days = 1)
+tomorrow = datetime.now() + timedelta(days = (1))
 timedate = tomorrow.replace(hour=4)
 timedate = timedate.replace(minute=0)
 timedate = timedate.replace(second=0)
 print(timedate)
+
+
 ts = load.timescale()
 DEG_IN_RADIAN = 57.2957795130823
 EARTHRAD_IN_AU = 23454.7910556298
@@ -98,8 +100,8 @@ sun = eph['sun']
 earth = eph['earth']
 
 swope = earth + Topos('29.01597 S','70.69208 W')
-moonobs = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,4,0,0)).observe(moon)
-sunobs = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,4,0,0)).observe(sun)
+moonobs = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hour,0,0)).observe(moon)
+sunobs = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hour,0,0)).observe(sun)
 moonapp = moonobs.apparent()
 sunapp = sunobs.apparent()
 
@@ -109,6 +111,10 @@ print("Angle from Moon to Sun: " + str(elongation))
 ###########################################################################
 
 alt, az, distance = moonapp.altaz()
+moonapp.radec()
+ra, dec, distance = moonapp.radec()
+print(ra.hstr())
+print(dec.dstr())
 print("Altitude of the moon: " + str(alt))
 print("Distance to the moon: " + str(distance))
 ###########################################################################
@@ -139,7 +145,7 @@ for name in names:
 	DEChrs = decdeg2dms(DECobject)
 
 	target = Star(ra_hours=(RAobject/360 * 24,0,0),dec_degrees=(DEChrs[0],DEChrs[1],DEChrs[2]))
-	objecto = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,4,0,0)).observe(target)
+	objecto = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hour,0,0)).observe(target)
 	alto, azo, do = objecto.apparent().altaz()
 
 	print("Altitude of the object: " + str(alto))
@@ -151,11 +157,9 @@ for name in names:
 	kzen = 0.172
 
 	elong = str(elongation.to(u.rad).to(u.deg))
-	#altObject = float(("{0.alt:.2}".format(targetaltaz))[:("{0.alt:.2}".format(targetaltaz)).index(' ')])
 	altMoon = str(alt.to(u.deg))
 	alt_target = str(alto.to(u.deg))
 	dist = str(distance)
 	brightness = lunskybright(float(elong[:elong.index(' ')]), float(str(rho)[:str(rho).index(' ')]), kzen, float(altMoon[:altMoon.index(' ')]), float(alt_target[:alt_target.index(' ')]), float(dist[:dist.index(' ')]))
-	#brightness = lunskybright(moonElong, 48.1, kzen, 62.9, 14.9, moondist)
 	print("Lunar Sky Brightness of " + name + " is " + str(brightness))
 	print("ENDING " + name)
