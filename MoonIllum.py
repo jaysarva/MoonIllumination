@@ -25,15 +25,15 @@ from skyfield.api import Topos, load, Star
 from skyfield.toposlib import Topos
 import sys
 
-names=['2019cwt']
-
+names=['2019cwt'] #Supernova names you want to find the lunar sky brightness of
+#Finding and date of TOMORROW! CHANGE TIME AND DATE HERE IF YOU WANT TO, DON'T CHANGE IT ANYWHERE ELSE IN THE FILE.
 tomorrow = datetime.now() + timedelta(days = (1))
 timedate = tomorrow.replace(hour=4)
 timedate = timedate.replace(minute=0)
 timedate = timedate.replace(second=0)
 print(timedate)
 
-
+#Load in the database
 ts = load.timescale()
 DEG_IN_RADIAN = 57.2957795130823
 EARTHRAD_IN_AU = 23454.7910556298
@@ -94,7 +94,7 @@ def decdeg2dms(dd):
    degrees,minutes = divmod(minutes,60)
    degrees = degrees if is_positive else -degrees
    return (degrees,minutes,seconds)
-eph = load('de421.bsp')
+eph = load('de421.bsp') #Load in sun, moon, and earth data.
 moon = eph['moon']
 sun = eph['sun']
 earth = eph['earth']
@@ -105,7 +105,7 @@ sunobs = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hou
 moonapp = moonobs.apparent()
 sunapp = sunobs.apparent()
 
-elongation = (moonapp.separation_from(sunapp)).to(u.deg)
+elongation = (moonapp.separation_from(sunapp)).to(u.deg) #sun-moon angle is found here
 
 print("Angle from Moon to Sun: " + str(elongation))
 ###########################################################################
@@ -115,11 +115,11 @@ moonapp.radec()
 ra, dec, distance = moonapp.radec()
 print(ra.hstr())
 print(dec.dstr())
-print("Altitude of the moon: " + str(alt))
+print("Altitude of the moon: " + str(alt)) #Altitude and distance of the moon found here
 print("Distance to the moon: " + str(distance))
 ###########################################################################
 #Finding the altitude of the object
-for name in names:
+for name in names: #Looking through ziggy phot files for the RA and Dec
 	print("STARTING " + name)
 	query_mag(name)
 	txt_file = (name+"tmp")
@@ -144,15 +144,15 @@ for name in names:
 	RAhrs=decdeg2dms(RAobject)
 	DEChrs = decdeg2dms(DECobject)
 
-	target = Star(ra_hours=(RAobject/360 * 24,0,0),dec_degrees=(DEChrs[0],DEChrs[1],DEChrs[2]))
-	objecto = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hour,0,0)).observe(target)
+	target = Star(ra_hours=(RAobject/360 * 24,0,0),dec_degrees=(DEChrs[0],DEChrs[1],DEChrs[2])) #Make a fixed body object with the RA and Dec...
+	objecto = swope.at(ts.utc(timedate.year, timedate.month,timedate.day,timedate.hour,0,0)).observe(target) #Then find altitude and azimuth of the sn
 	alto, azo, do = objecto.apparent().altaz()
 
 	print("Altitude of the object: " + str(alto))
 	###########################################################################
 
 	rho = (moonapp.separation_from(objecto.apparent())).to(u.deg)
-	print("angle of moon and object: " + str(rho))
+	print("angle of moon and object: " + str(rho)) #calculate moon-object angle
 
 	kzen = 0.172
 
@@ -161,5 +161,5 @@ for name in names:
 	alt_target = str(alto.to(u.deg))
 	dist = str(distance)
 	brightness = lunskybright(float(elong[:elong.index(' ')]), float(str(rho)[:str(rho).index(' ')]), kzen, float(altMoon[:altMoon.index(' ')]), float(alt_target[:alt_target.index(' ')]), float(dist[:dist.index(' ')]))
-	print("Lunar Sky Brightness of " + name + " is " + str(brightness))
+	print("Lunar Sky Brightness of " + name + " is " + str(brightness)) #plug everything into the formula
 	print("ENDING " + name)
